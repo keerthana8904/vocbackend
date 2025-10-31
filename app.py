@@ -72,25 +72,19 @@ def token_required(f):
 # -------------------------------------------------------------
 # Disease Prediction Function
 # -------------------------------------------------------------
+# app.py
 def predict_disease(mq2, mq3, mq135, temp, r0_mq2, r0_mq3, r0_mq135):
     if model is None:
         return {"prediction": "model_not_loaded"}
 
-    # Normalize using R₀ values
-    mq2_ratio = mq2 / r0_mq2 if r0_mq2 > 0 else mq2
-    mq3_ratio = mq3 / r0_mq3 if r0_mq3 > 0 else mq3
-    mq135_ratio = mq135 / r0_mq135 if r0_mq135 > 0 else mq135
-
-    features = np.array([[mq2_ratio, mq3_ratio, mq135_ratio, temp]])
+    # Use RAW ADCs to match training data
+    features = np.array([[mq2, mq3, mq135, temp]])
     pred = model.predict(features)[0]
     probs = model.predict_proba(features)[0]
     labels = model.classes_
-
     probs_dict = {labels[i]: round(float(probs[i]), 3) for i in range(len(labels))}
     risk_score = round(float(np.max(probs) * 100), 2)
-
     return {"prediction": pred, "probabilities": probs_dict, "risk_score": risk_score}
-
 
 # -------------------------------------------------------------
 # ROUTES
